@@ -7,9 +7,9 @@ const HEIGHT_CORRECTION = 30; // Pixels
 const SIZE_PICKER_MIN = 5;  // Pixels
 const SIZE_PICKER_MAX = 50;  // Pixels
 const SIZE_PICKER_STEP = 5;  // Pixels
-const SIZE_PICKER_DEFAULT = 5;  // Pixels
+const SIZE_PICKER_DEFAULT = 10;  // Pixels
 
-const COLOR_PICKER_DEFAULT = 'yellow';
+const COLOR_PICKER_DEFAULT = 'purple';
 
 const REPEAT_PICKER_MIN = 1;
 const REPEAT_PICKER_MAX = 10;
@@ -34,7 +34,8 @@ var cursors = [];
 var svgCanvas;
 var debugText;
 var density;
-var cursorSize = CENTER_CURSOR_RADIUS;
+var cursorSize = SIZE_PICKER_DEFAULT;
+var brushColor = COLOR_PICKER_DEFAULT;
 
 /**
  * Text
@@ -74,6 +75,7 @@ function createUserControls() {
 
     repeatPicker.input(onRepeatSliderChange);
     sizePicker.input(onBrushSizeSliderChange);
+    colorPicker.input(onColorChange);
 
     colorPicker.parent(USER_CONTROLS);
     (createSpan(translations.en.brushSize)).parent(USER_CONTROLS);
@@ -128,9 +130,9 @@ function updateCursors() {
 
 function makeCursor() {
     const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    c.setAttribute('fill', 'transparent');
-    c.setAttribute('stroke', 'rgb(120,120,120)');
-    c.setAttribute('stroke-width', '2');
+    c.setAttribute('fill', brushColor);
+    // c.setAttribute('stroke', 'rgb(120,120,120)');
+    // c.setAttribute('stroke-width', '2');
     c.setAttribute('r', `${cursorSize / density}`);
 
     return c;
@@ -167,6 +169,11 @@ function onRepeatSliderChange() {
 
 function onBrushSizeSliderChange() {
     cursorSize = sizePicker.value();
+    updateCursorGliphs();
+}
+
+function onColorChange() {
+    brushColor = colorPicker.value();
     updateCursorGliphs();
 }
 
