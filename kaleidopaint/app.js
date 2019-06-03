@@ -1,13 +1,5 @@
 
 /**
- * Global references
- */
-var colorPicker;
-var sizePicker;
-var repeatPicker;
-var mainCanvas;
-
-/**
  * Constants
  */
 const HEIGHT_CORRECTION = 30; // Pixels
@@ -26,6 +18,22 @@ const REPEAT_PICKER_DEFAULT = 3;
 
 const CENTER_CURSOR_RADIUS = 10;  // Pixels
 const CENTER_CURSOR_COLOR = 100;  // Grayscale value
+
+
+/**
+ * Global references
+ */
+var colorPicker;
+var sizePicker;
+var repeatPicker;
+var mainCanvas;
+
+var numCursors = REPEAT_PICKER_DEFAULT;
+var cursorGliphs = [];
+var cursors = [];
+var svgCanvas;
+var debugText;
+var density;
 
 /**
  * Text
@@ -70,16 +78,66 @@ function createUserControls() {
 }
 
 function updateCanvas() {
-    console.log(`Window dimensions: ${windowWidth} x ${correctHeight()}`);
-    resizeCanvas(windowWidth, correctHeight());
-    updateCenterSpot();
+    const ch = correctHeight();
+    console.log(`Window dimensions: ${windowWidth} x ${ch}`);
+    resizeCanvas(windowWidth, ch);
+    svgCanvas.setAttribute('viewBox', `0 0 ${windowWidth} ${ch}`)
 }
 
-function updateCenterSpot() {
+function drawCenterSpot() {
     let centerX = windowWidth / 2;
     let centerY = windowHeight / 2;
     noFill(); stroke(color(CENTER_CURSOR_COLOR));
     circle(centerX , centerY, CENTER_CURSOR_RADIUS);
+}
+
+function drawCursors() {
+    for (let i = 0; i < cursorGliphs.length; ++i) {
+        let c = cursors[i];
+        cursorGliphs[i].setAttribute('cx', `${c[0]}`);
+        cursorGliphs[i].setAttribute('cy', `${c[1]}`);
+    }
+}
+
+function updateCursors() {
+    let centerX = windowWidth / 2;
+    let centerY = windowHeight / 2;
+    let x = mouseX;
+    let y = mouseY;
+    let d = dist(centerX, centerY, x, y);
+    let deg = atan((y - centerY) / (x - centerX));
+    if (x < centerX) {
+        deg += PI;
+    }
+    debugText.innerHTML = `Cursor degrees ${int(degrees(deg))}`;
+    let dDeg = 2 * PI / numCursors;
+    cursors = [];
+
+    for (let i = 0; i < numCursors; ++i) {
+        let id = deg + dDeg * i;
+        let ix = d * cos(id) + centerX;
+        let iy = d * sin(id) + centerY;
+        cursors.push([ix, iy]);
+    }
+}
+
+function makeCursor() {
+    const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    c.setAttribute('fill', 'transparent');
+    c.setAttribute('stroke', 'rgb(120,120,120)');
+    c.setAttribute('stroke-width', '2');
+    c.setAttribute('r', `${CENTER_CURSOR_RADIUS / density}`);
+
+    return c;
+}
+
+function updateCursorGliphs() {
+    cursorGliphs = [];
+    for (let i = 0; i < cursors.length; ++i) {
+        let c = makeCursor();
+        svgCanvas.appendChild(c);
+        cursorGliphs.push(c);
+    }
 }
 
 /**
@@ -100,14 +158,27 @@ function setup() {
     createUserControls();
 
     // Start canvas
-    let density = displayDensity();
+    svgCanvas = document.getElementById('svgCanvas');
+    debugText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    debugText.setAttribute('x', '10');
+    debugText.setAttribute('y', '10');
+    debugText.setAttribute('class', 'debug');
+    svgCanvas.appendChild(debugText);
+
+
+    density = displayDensity();
     console.log(`Pixel density: ${density}`);
     mainCanvas = createCanvas(windowWidth, correctHeight());
     pixelDensity(density);
     mainCanvas.parent(DRAW_AREA);
     updateCanvas();
+    updateCursors();
+    updateCursorGliphs();
 }
 
 function draw() {
-    // ellipse(50, 50, 80, 80);
+    clear();
+    drawCenterSpot();
+    updateCursors();
+    drawCursors();
 }
