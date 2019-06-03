@@ -34,6 +34,7 @@ var cursors = [];
 var svgCanvas;
 var debugText;
 var density;
+var cursorSize = CENTER_CURSOR_RADIUS;
 
 /**
  * Text
@@ -70,6 +71,10 @@ function createUserControls() {
         REPEAT_PICKER_MIN, REPEAT_PICKER_MAX,
         REPEAT_PICKER_DEFAULT, REPEAT_PICKER_STEP
     );
+
+    repeatPicker.input(onRepeatSliderChange);
+    sizePicker.input(onBrushSizeSliderChange);
+
     colorPicker.parent(USER_CONTROLS);
     (createSpan(translations.en.brushSize)).parent(USER_CONTROLS);
     sizePicker.parent(USER_CONTROLS);
@@ -126,7 +131,7 @@ function makeCursor() {
     c.setAttribute('fill', 'transparent');
     c.setAttribute('stroke', 'rgb(120,120,120)');
     c.setAttribute('stroke-width', '2');
-    c.setAttribute('r', `${CENTER_CURSOR_RADIUS / density}`);
+    c.setAttribute('r', `${cursorSize / density}`);
 
     return c;
 }
@@ -160,12 +165,16 @@ function onRepeatSliderChange() {
     updateCursorGliphs();
 }
 
+function onBrushSizeSliderChange() {
+    cursorSize = sizePicker.value();
+    updateCursorGliphs();
+}
+
 /**
  * ========= p5js stuff =======================
  */
 function setup() {
     createUserControls();
-    repeatPicker.input(onRepeatSliderChange);
 
     // Start canvas
     svgCanvas = document.getElementById('svgCanvas');
