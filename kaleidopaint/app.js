@@ -14,7 +14,7 @@ const COLOR_PICKER_DEFAULT = 'yellow';
 const REPEAT_PICKER_MIN = 1;
 const REPEAT_PICKER_MAX = 10;
 const REPEAT_PICKER_STEP = 1;
-const REPEAT_PICKER_DEFAULT = 3;
+const REPEAT_PICKER_DEFAULT = 4;
 
 const CENTER_CURSOR_RADIUS = 10;  // Pixels
 const CENTER_CURSOR_COLOR = 100;  // Grayscale value
@@ -109,7 +109,7 @@ function updateCursors() {
     if (x < centerX) {
         deg += PI;
     }
-    debugText.innerHTML = `Cursor degrees ${int(degrees(deg))}`;
+    // debugText.innerHTML = `Cursor degrees ${int(degrees(deg))}`;
     let dDeg = 2 * PI / numCursors;
     cursors = [];
 
@@ -132,6 +132,9 @@ function makeCursor() {
 }
 
 function updateCursorGliphs() {
+    for (let i = 0; i < cursorGliphs.length; ++i) {
+        svgCanvas.removeChild(cursorGliphs[i]);
+    }
     cursorGliphs = [];
     for (let i = 0; i < cursors.length; ++i) {
         let c = makeCursor();
@@ -151,11 +154,18 @@ function onWindowResize() {
 }
 window.addEventListener('resize', onWindowResize);
 
+function onRepeatSliderChange() {
+    numCursors = repeatPicker.value();
+    updateCursors();
+    updateCursorGliphs();
+}
+
 /**
  * ========= p5js stuff =======================
  */
 function setup() {
     createUserControls();
+    repeatPicker.input(onRepeatSliderChange);
 
     // Start canvas
     svgCanvas = document.getElementById('svgCanvas');
@@ -164,7 +174,6 @@ function setup() {
     debugText.setAttribute('y', '10');
     debugText.setAttribute('class', 'debug');
     svgCanvas.appendChild(debugText);
-
 
     density = displayDensity();
     console.log(`Pixel density: ${density}`);
