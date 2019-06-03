@@ -24,6 +24,9 @@ const REPEAT_PICKER_MAX = 10;
 const REPEAT_PICKER_STEP = 1;
 const REPEAT_PICKER_DEFAULT = 3;
 
+const CENTER_CURSOR_RADIUS = 10;  // Pixels
+const CENTER_CURSOR_COLOR = 100;  // Grayscale value
+
 /**
  * Text
  */
@@ -66,6 +69,19 @@ function createUserControls() {
     repeatPicker.parent(USER_CONTROLS);
 }
 
+function updateCanvas() {
+    console.log(`Window dimensions: ${windowWidth} x ${correctHeight()}`);
+    resizeCanvas(windowWidth, correctHeight());
+    updateCenterSpot();
+}
+
+function updateCenterSpot() {
+    let centerX = windowWidth / 2;
+    let centerY = windowHeight / 2;
+    noFill(); stroke(color(CENTER_CURSOR_COLOR));
+    circle(centerX , centerY, CENTER_CURSOR_RADIUS);
+}
+
 /**
  * ======== event handlers
  */
@@ -73,8 +89,7 @@ function createUserControls() {
  * Handles window resize
  */
 function onWindowResize() {
-    console.log(`Window dimensions: ${windowWidth} x ${correctHeight()}`);
-    resizeCanvas(windowWidth, correctHeight());
+    updateCanvas();
 }
 window.addEventListener('resize', onWindowResize);
 
@@ -87,12 +102,12 @@ function setup() {
     // Start canvas
     let density = displayDensity();
     console.log(`Pixel density: ${density}`);
-    console.log(`Window dimensions: ${windowWidth} x ${correctHeight()}`);
-    pixelDensity(density);
     mainCanvas = createCanvas(windowWidth, correctHeight());
+    pixelDensity(density);
     mainCanvas.parent(DRAW_AREA);
+    updateCanvas();
 }
 
 function draw() {
-    ellipse(50, 50, 80, 80);
+    // ellipse(50, 50, 80, 80);
 }
