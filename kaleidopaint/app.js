@@ -37,6 +37,8 @@ var density;
 var cursorSize = SIZE_PICKER_DEFAULT;
 var brushColor = COLOR_PICKER_DEFAULT;
 
+var lastCoords;  // Holds the previous location of the touch coordinates to draw from, to the new coordinate.
+
 /**
  * Text
  */
@@ -151,10 +153,37 @@ function updateCursorGliphs() {
 }
 
 /**
- * ======== event handlers
+ * Draw the definition of a brush stroke to the canvas.
+ * @param {number[]} from Two element array to hold coordinate x and y
+ * @param {number[]} to Two element array to hold coordinate x and y
  */
+function brushStroke(from, to) {
+    stroke(color(brushColor));
+    strokeWeight(cursorSize);
+    let dx = to[0] - from[0];
+    let dy = to[1] - from[1];
+    let d = Math.sqrt(
+        Math.pow(to[0] - from[0], 2.0) + Math.pow(to[1] - from[1], 2.0)
+    );
+
+    let deg = atan(dy / dx);
+    if (to[0] < 0) {
+        deg += PI;
+    }
+    let dDeg = 2 * PI / numCursors;
+
+    for (let i = 0; i < cursors.length; ++i) {
+        let id = deg + dDeg * i;
+        let ix = d * cos(id);
+        let iy = d * sin(id);
+
+        let c = cursors[i];
+        line(c[0], c[1], c[0] + ix, c[1] + iy);
+    }
+}
+
 /**
- * Handles window resize
+ * Event handlers
  */
 function onWindowResize() {
     updateCanvas();
@@ -175,6 +204,23 @@ function onBrushSizeSliderChange() {
 function onColorChange() {
     brushColor = colorPicker.value();
     updateCursorGliphs();
+}
+
+/**
+ * Stuff needed for drawing to canvas
+ */
+function touchStarted() {
+    lastCoords = [mouseX, mouseY];
+}
+
+function touchEnded() {
+    // Stuff related to keeping a copy of the last version of the image for undo
+}
+
+function touchMoved() {
+    let newCoords = [mouseX, mouseY];
+    brushStroke(lastCoords, newCoords);
+    lastCoords = newCoords;
 }
 
 /**
@@ -202,7 +248,6 @@ function setup() {
 }
 
 function draw() {
-    clear();
     drawCenterSpot();
     updateCursors();
     drawCursors();
