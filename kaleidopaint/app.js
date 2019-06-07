@@ -14,7 +14,7 @@ const COLOR_PICKER_DEFAULT = 'purple';
 const REPEAT_PICKER_MIN = 1;
 const REPEAT_PICKER_MAX = 10;
 const REPEAT_PICKER_STEP = 1;
-const REPEAT_PICKER_DEFAULT = 6;
+const REPEAT_PICKER_DEFAULT = 4;
 
 const CENTER_CURSOR_RADIUS = 10;  // Pixels
 const CENTER_CURSOR_COLOR = 100;  // Grayscale value
