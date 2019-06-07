@@ -4,10 +4,10 @@
  */
 const HEIGHT_CORRECTION = 30; // Pixels
 
-const SIZE_PICKER_MIN = 5;  // Pixels
-const SIZE_PICKER_MAX = 50;  // Pixels
-const SIZE_PICKER_STEP = 5;  // Pixels
-const SIZE_PICKER_DEFAULT = 10;  // Pixels
+const SIZE_PICKER_MIN = 1;  // Pixels
+const SIZE_PICKER_MAX = 25;  // Pixels
+const SIZE_PICKER_STEP = 1;  // Pixels
+const SIZE_PICKER_DEFAULT = 5;  // Pixels
 
 const COLOR_PICKER_DEFAULT = 'purple';
 
@@ -44,7 +44,7 @@ var lastCoords;  // Holds the previous location of the touch coordinates to draw
  */
 const translations = {
     en: {
-        brushSize: 'brush size',
+        brushSize: 'size',
         repeatNum: 'repeat'
     }
 }
@@ -70,10 +70,12 @@ function createUserControls() {
         SIZE_PICKER_MIN, SIZE_PICKER_MAX,
         SIZE_PICKER_DEFAULT, SIZE_PICKER_STEP
     );
+    sizePicker.addClass('slider');
     repeatPicker = createSlider(
         REPEAT_PICKER_MIN, REPEAT_PICKER_MAX,
         REPEAT_PICKER_DEFAULT, REPEAT_PICKER_STEP
     );
+    repeatPicker.addClass('slider');
 
     repeatPicker.input(onRepeatSliderChange);
     sizePicker.input(onBrushSizeSliderChange);
@@ -96,6 +98,7 @@ function updateCanvas() {
 function drawCenterSpot() {
     let centerX = windowWidth / 2;
     let centerY = windowHeight / 2;
+    strokeWeight(1);
     noFill(); stroke(color(CENTER_CURSOR_COLOR));
     circle(centerX , centerY, CENTER_CURSOR_RADIUS);
 }
@@ -103,38 +106,28 @@ function drawCenterSpot() {
 function drawCursors() {
     for (let i = 0; i < cursorGliphs.length; ++i) {
         let c = cursors[i];
-        cursorGliphs[i].setAttribute('cx', `${c[0]}`);
-        cursorGliphs[i].setAttribute('cy', `${c[1]}`);
+        cursorGliphs[i].setAttribute('cx', `${c.x}`);
+        cursorGliphs[i].setAttribute('cy', `${c.y}`);
     }
 }
 
 function updateCursors() {
-    let centerX = windowWidth / 2;
-    let centerY = windowHeight / 2;
-    let x = mouseX;
-    let y = mouseY;
-    let d = dist(centerX, centerY, x, y);
-    let deg = atan((y - centerY) / (x - centerX));
-    if (x < centerX) {
-        deg += PI;
-    }
-    // debugText.innerHTML = `Cursor degrees ${int(degrees(deg))}`;
-    let dDeg = 2 * PI / numCursors;
+    let centerPoint = createVector(windowWidth / 2, windowHeight / 2);
+    let mousePointer = createVector(mouseX, mouseY);
+    let distanceVector = p5.Vector.sub(mousePointer, centerPoint);
+    const dDeg = 2 * PI / numCursors;
     cursors = [];
 
     for (let i = 0; i < numCursors; ++i) {
-        let id = deg + dDeg * i;
-        let ix = d * cos(id) + centerX;
-        let iy = d * sin(id) + centerY;
-        cursors.push([ix, iy]);
+        cursors.push(
+            p5.Vector.add(centerPoint, distanceVector.rotate(dDeg * i))
+        );
     }
 }
 
 function makeCursor() {
     const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     c.setAttribute('fill', brushColor);
-    // c.setAttribute('stroke', 'rgb(120,120,120)');
-    // c.setAttribute('stroke-width', '2');
     c.setAttribute('r', `${cursorSize / density}`);
 
     return c;
@@ -158,27 +151,19 @@ function updateCursorGliphs() {
  * @param {number[]} to Two element array to hold coordinate x and y
  */
 function brushStroke(from, to) {
+    const centerPoint = createVector(windowWidth / 2, windowHeight / 2);
+    const dFrom = p5.Vector.sub(from, centerPoint);
+    const dTo = p5.Vector.sub(from, centerPoint);
+
     stroke(color(brushColor));
     strokeWeight(cursorSize);
-    let dx = to[0] - from[0];
-    let dy = to[1] - from[1];
-    let d = Math.sqrt(
-        Math.pow(to[0] - from[0], 2.0) + Math.pow(to[1] - from[1], 2.0)
-    );
-
-    let deg = atan(dy / dx);
-    if (to[0] < 0) {
-        deg += PI;
-    }
     let dDeg = 2 * PI / numCursors;
 
     for (let i = 0; i < cursors.length; ++i) {
-        let id = deg + dDeg * i;
-        let ix = d * cos(id);
-        let iy = d * sin(id);
+        const f = p5.Vector.add(centerPoint, dFrom.rotate(dDeg * i));
+        const t = p5.Vector.add(centerPoint, dTo.rotate(dDeg * i));
 
-        let c = cursors[i];
-        line(c[0], c[1], c[0] + ix, c[1] + iy);
+        line(f.x, f.y, t.x, t.y);
     }
 }
 
@@ -210,7 +195,7 @@ function onColorChange() {
  * Stuff needed for drawing to canvas
  */
 function touchStarted() {
-    lastCoords = [mouseX, mouseY];
+    lastCoords = createVector(mouseX, mouseY);//[mouseX, mouseY];
 }
 
 function touchEnded() {
@@ -218,7 +203,7 @@ function touchEnded() {
 }
 
 function touchMoved() {
-    let newCoords = [mouseX, mouseY];
+    let newCoords = createVector(mouseX, mouseY);//[mouseX, mouseY];
     brushStroke(lastCoords, newCoords);
     lastCoords = newCoords;
 }
@@ -237,6 +222,7 @@ function setup() {
     debugText.setAttribute('class', 'debug');
     svgCanvas.appendChild(debugText);
 
+    smooth();
     density = displayDensity();
     console.log(`Pixel density: ${density}`);
     mainCanvas = createCanvas(windowWidth, correctHeight());
