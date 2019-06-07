@@ -2,7 +2,7 @@
 /**
  * Constants
  */
-const HEIGHT_CORRECTION = 50; // Pixels
+const HEIGHT_CORRECTION = 100; // Pixels
 
 const SIZE_PICKER_MIN = 1;  // Pixels
 const SIZE_PICKER_MAX = 25;  // Pixels
@@ -209,18 +209,15 @@ function exhoustPoints() {
 
 function touchStarted() {
     points.push(createVector(mouseX, mouseY));
-    return false;
 }
 
 function touchEnded() {
     points = [];
     // Stuff related to keeping a copy of the last version of the image for undo
-    return false;
 }
 
 function touchMoved() {
     points.push(createVector(mouseX, mouseY));
-    return false;
 }
 
 /**
