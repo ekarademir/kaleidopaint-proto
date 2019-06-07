@@ -153,7 +153,7 @@ function updateCursorGliphs() {
 function brushStroke(from, to) {
     const centerPoint = createVector(windowWidth / 2, windowHeight / 2);
     const dFrom = p5.Vector.sub(from, centerPoint);
-    const dTo = p5.Vector.sub(from, centerPoint);
+    const dTo = p5.Vector.sub(to, centerPoint);
 
     stroke(color(brushColor));
     strokeWeight(cursorSize);
@@ -194,9 +194,21 @@ function onColorChange() {
 /**
  * Stuff needed for drawing to canvas
  */
+
+const points = [];
+
+function exhoustPoints() {
+    if (points.length > 2) {
+        brushStroke(
+            points.shift(),
+            points[0]
+        )
+    }
+    setTimeout(exhoustPoints, 0);
+}
+
 function touchStarted() {
-    lastCoords = createVector(mouseX, mouseY);//[mouseX, mouseY];
-    return false;
+    // Keeping for future
 }
 
 function touchEnded() {
@@ -204,9 +216,7 @@ function touchEnded() {
 }
 
 function touchMoved() {
-    let newCoords = createVector(mouseX, mouseY);//[mouseX, mouseY];
-    brushStroke(lastCoords, newCoords);
-    lastCoords = newCoords;
+    points.push(createVector(mouseX, mouseY));
     return false;
 }
 
@@ -225,6 +235,7 @@ function setup() {
     svgCanvas.appendChild(debugText);
 
     smooth();
+    frameRate(30);
     density = displayDensity();
     console.log(`Pixel density: ${density}`);
     mainCanvas = createCanvas(windowWidth, correctHeight());
@@ -233,6 +244,7 @@ function setup() {
     updateCanvas();
     updateCursors();
     updateCursorGliphs();
+    setTimeout(exhoustPoints, 0);
 }
 
 function draw() {
