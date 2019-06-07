@@ -14,7 +14,7 @@ const COLOR_PICKER_DEFAULT = 'purple';
 const REPEAT_PICKER_MIN = 1;
 const REPEAT_PICKER_MAX = 10;
 const REPEAT_PICKER_STEP = 1;
-const REPEAT_PICKER_DEFAULT = 4;
+const REPEAT_PICKER_DEFAULT = 6;
 
 const CENTER_CURSOR_RADIUS = 10;  // Pixels
 const CENTER_CURSOR_COLOR = 100;  // Grayscale value
@@ -120,7 +120,7 @@ function updateCursors() {
 
     for (let i = 0; i < numCursors; ++i) {
         cursors.push(
-            p5.Vector.add(centerPoint, distanceVector.rotate(dDeg * i))
+            p5.Vector.add(centerPoint, distanceVector.rotate(dDeg))
         );
     }
 }
@@ -160,8 +160,8 @@ function brushStroke(from, to) {
     let dDeg = 2 * PI / numCursors;
 
     for (let i = 0; i < cursors.length; ++i) {
-        const f = p5.Vector.add(centerPoint, dFrom.rotate(dDeg * i));
-        const t = p5.Vector.add(centerPoint, dTo.rotate(dDeg * i));
+        const f = p5.Vector.add(centerPoint, dFrom.rotate(dDeg));
+        const t = p5.Vector.add(centerPoint, dTo.rotate(dDeg));
 
         line(f.x, f.y, t.x, t.y);
     }
