@@ -208,10 +208,13 @@ function exhoustPoints() {
 }
 
 function touchStarted() {
-    // Keeping for future
+    points.push(createVector(mouseX, mouseY));
+    return false;
 }
 
 function touchEnded() {
+    points.push(createVector(mouseX, mouseY));
+    return false;
     // Stuff related to keeping a copy of the last version of the image for undo
 }
 
