@@ -196,6 +196,7 @@ function onColorChange() {
  */
 function touchStarted() {
     lastCoords = createVector(mouseX, mouseY);//[mouseX, mouseY];
+    return false;
 }
 
 function touchEnded() {
@@ -206,6 +207,7 @@ function touchMoved() {
     let newCoords = createVector(mouseX, mouseY);//[mouseX, mouseY];
     brushStroke(lastCoords, newCoords);
     lastCoords = newCoords;
+    return false;
 }
 
 /**
