@@ -213,9 +213,9 @@ function touchStarted() {
 }
 
 function touchEnded() {
-    points.push(createVector(mouseX, mouseY));
-    return false;
+    points = [];
     // Stuff related to keeping a copy of the last version of the image for undo
+    return false;
 }
 
 function touchMoved() {
