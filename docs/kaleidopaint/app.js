@@ -2,7 +2,7 @@
 /**
  * Constants
  */
-const HEIGHT_CORRECTION = 30; // Pixels
+const HEIGHT_CORRECTION = 50; // Pixels
 
 const SIZE_PICKER_MIN = 1;  // Pixels
 const SIZE_PICKER_MAX = 25;  // Pixels
