@@ -195,7 +195,7 @@ function onColorChange() {
  * Stuff needed for drawing to canvas
  */
 
-const points = [];
+let points = [];
 
 function exhoustPoints() {
     if (points.length > 2) {
