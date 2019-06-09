@@ -1,4 +1,7 @@
-
+/**
+ * Undo operations are slow because of some stuff in p5.js
+ * Ignoring that since this is a prototype
+ */
 /**
  * Constants
  */
@@ -90,9 +93,9 @@ function createUserControls() {
     (createSpan(translations.en.repeatNum)).parent(USER_CONTROLS);
     repeatPicker.parent(USER_CONTROLS);
 
-    undoButton = createButton(translations.en.undo);
-    undoButton.parent(USER_CONTROLS);
-    undoButton.mouseReleased(onUndo);
+    // undoButton = createButton(translations.en.undo);
+    // undoButton.parent(USER_CONTROLS);
+    // undoButton.mouseReleased(onUndo);
 }
 
 function updateCanvas() {
@@ -265,15 +268,15 @@ function exhoustPoints() {
 }
 
 function touchStarted(evt) {
-    // Save latest copy of the image to history stack
-    // Only save to history when event source is a cursor
-    // p5.js lumps all event propagators together.
-    // we don't want to save to history if UI button is clicked
-    // Only the last cursor propagates an event
-    if(cursorGliphs[cursorGliphs.length - 1] === evt.srcElement) {
-        // Defer this action to prevent delay in interaction
-        setTimeout(saveNewFrameToHistory, 0);
-    }
+    // // Save latest copy of the image to history stack
+    // // Only save to history when event source is a cursor
+    // // p5.js lumps all event propagators together.
+    // // we don't want to save to history if UI button is clicked
+    // // Only the last cursor propagates an event
+    // if(cursorGliphs[cursorGliphs.length - 1] === evt.srcElement) {
+    //     // Defer this action to prevent delay in interaction
+    //     setTimeout(saveNewFrameToHistory, 0);
+    // }
     points.push(createVector(mouseX, mouseY));
 }
 
