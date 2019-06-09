@@ -26,6 +26,8 @@ const CENTER_CURSOR_COLOR = 100;  // Grayscale value
 var colorPicker;
 var sizePicker;
 var repeatPicker;
+var undoButton;
+var redoButton;
 var mainCanvas;
 
 var numCursors = REPEAT_PICKER_DEFAULT;
@@ -37,15 +39,15 @@ var density;
 var cursorSize = SIZE_PICKER_DEFAULT;
 var brushColor = COLOR_PICKER_DEFAULT;
 
-var lastCoords;  // Holds the previous location of the touch coordinates to draw from, to the new coordinate.
-
 /**
  * Text
  */
 const translations = {
     en: {
         brushSize: 'size',
-        repeatNum: 'repeat'
+        repeatNum: 'repeat',
+        undo: 'undo',
+        redo: 'redo',
     }
 }
 
@@ -86,6 +88,11 @@ function createUserControls() {
     sizePicker.parent(USER_CONTROLS);
     (createSpan(translations.en.repeatNum)).parent(USER_CONTROLS);
     repeatPicker.parent(USER_CONTROLS);
+
+    undoButton = createButton(translations.en.undo);
+    undoButton.parent(USER_CONTROLS);
+    redoButton = createButton(translations.en.redo);
+    redoButton.parent(USER_CONTROLS);
 }
 
 function updateCanvas() {
@@ -196,6 +203,7 @@ function onColorChange() {
  */
 
 let points = [];
+let imageHistory = []; // Copies of images ordered as a timeline. Used as a stack.
 
 function exhoustPoints() {
     if (points.length > 2) {
