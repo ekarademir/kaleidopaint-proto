@@ -1,4 +1,7 @@
-
+/**
+ * Undo operations are slow because of some stuff in p5.js
+ * Ignoring that since this is a prototype
+ */
 /**
  * Constants
  */
@@ -19,6 +22,7 @@ const REPEAT_PICKER_DEFAULT = 4;
 const CENTER_CURSOR_RADIUS = 10;  // Pixels
 const CENTER_CURSOR_COLOR = 100;  // Grayscale value
 
+const MAX_UNDO = 10;  // Max length of image history to keep in memory.
 
 /**
  * Global references
@@ -26,6 +30,8 @@ const CENTER_CURSOR_COLOR = 100;  // Grayscale value
 var colorPicker;
 var sizePicker;
 var repeatPicker;
+var undoButton;
+var saveButton;
 var mainCanvas;
 
 var numCursors = REPEAT_PICKER_DEFAULT;
@@ -37,7 +43,7 @@ var density;
 var cursorSize = SIZE_PICKER_DEFAULT;
 var brushColor = COLOR_PICKER_DEFAULT;
 
-var lastCoords;  // Holds the previous location of the touch coordinates to draw from, to the new coordinate.
+var imageHistory = []; // Copies of images ordered as a timeline. Used as a stack.
 
 /**
  * Text
@@ -45,7 +51,9 @@ var lastCoords;  // Holds the previous location of the touch coordinates to draw
 const translations = {
     en: {
         brushSize: 'size',
-        repeatNum: 'repeat'
+        repeatNum: 'repeat',
+        undo: 'undo',
+        save: 'save',
     }
 }
 
@@ -86,6 +94,14 @@ function createUserControls() {
     sizePicker.parent(USER_CONTROLS);
     (createSpan(translations.en.repeatNum)).parent(USER_CONTROLS);
     repeatPicker.parent(USER_CONTROLS);
+
+    // undoButton = createButton(translations.en.undo);
+    // undoButton.parent(USER_CONTROLS);
+    // undoButton.mouseReleased(onUndo);
+
+    saveButton = createButton(translations.en.save);
+    saveButton.parent(USER_CONTROLS);
+    saveButton.mouseReleased(onSave);
 }
 
 function updateCanvas() {
@@ -93,6 +109,7 @@ function updateCanvas() {
     console.log(`Window dimensions: ${windowWidth} x ${ch}`);
     resizeCanvas(windowWidth, ch);
     svgCanvas.setAttribute('viewBox', `0 0 ${windowWidth} ${ch}`)
+    clear();
 }
 
 function drawCenterSpot() {
@@ -167,6 +184,52 @@ function brushStroke(from, to) {
     }
 }
 
+function canvasToImage() {
+    loadPixels();
+    let img = createImage(width, height);
+    img.loadPixels();
+    // For some reason p5.js desn't update image data if we manipulate img.pixels directly.
+    // So we use the slow method.
+    // img.pixels = new Uint8ClampedArray(pixels);
+    for (let i = 0; i < img.width; i++) {
+        for (let j = 0; j < img.height; j++) {
+            img.set(i, j, get(i, j));
+        }
+    }
+    img.updatePixels();
+    return img;
+}
+
+function imageToCanvas(img) {
+    loadPixels()
+    // For some reason p5.js desn't update image data if we manipulate img.pixels directly.
+    // pixels = new Uint8ClampedArray(img.pixels);
+    for (let i = 0; i < width; i++) {
+        for (let j = 0; j < height; j++) {
+            set(i, j, img.get(i, j));
+        }
+    }
+    updatePixels();
+}
+
+function saveNewFrameToHistory() {
+    imgP = Promise.resolve(canvasToImage());
+    imgP.then( img => {
+        if (imageHistory.length == MAX_UNDO) {
+            imageHistory.shift();
+        }
+        imageHistory.push(img);
+        console.log('Saved new frame, history length', imageHistory.length);
+    })
+}
+
+function loadLastImageToCanvas() {
+    // In order to undo there should be at least two frames save to history
+    if (imageHistory.length == 0) return;
+    let img = imageHistory.pop();
+    imageToCanvas(img);
+}
+
 /**
  * Event handlers
  */
@@ -191,6 +254,15 @@ function onColorChange() {
     updateCursorGliphs();
 }
 
+function onUndo() {
+    loadLastImageToCanvas();
+}
+
+function onSave() {
+    saveCanvas();
+    clear();
+}
+
 /**
  * Stuff needed for drawing to canvas
  */
@@ -207,13 +279,21 @@ function exhoustPoints() {
     setTimeout(exhoustPoints, 0);
 }
 
-function touchStarted() {
+function touchStarted(evt) {
+    // // Save latest copy of the image to history stack
+    // // Only save to history when event source is a cursor
+    // // p5.js lumps all event propagators together.
+    // // we don't want to save to history if UI button is clicked
+    // // Only the last cursor propagates an event
+    // if(cursorGliphs[cursorGliphs.length - 1] === evt.srcElement) {
+    //     // Defer this action to prevent delay in interaction
+    //     setTimeout(saveNewFrameToHistory, 0);
+    // }
     points.push(createVector(mouseX, mouseY));
 }
 
 function touchEnded() {
     points = [];
-    // Stuff related to keeping a copy of the last version of the image for undo
 }
 
 function touchMoved() {
