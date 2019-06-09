@@ -31,6 +31,7 @@ var colorPicker;
 var sizePicker;
 var repeatPicker;
 var undoButton;
+var saveButton;
 var mainCanvas;
 
 var numCursors = REPEAT_PICKER_DEFAULT;
@@ -52,6 +53,7 @@ const translations = {
         brushSize: 'size',
         repeatNum: 'repeat',
         undo: 'undo',
+        save: 'save',
     }
 }
 
@@ -96,6 +98,10 @@ function createUserControls() {
     // undoButton = createButton(translations.en.undo);
     // undoButton.parent(USER_CONTROLS);
     // undoButton.mouseReleased(onUndo);
+
+    saveButton = createButton(translations.en.save);
+    saveButton.parent(USER_CONTROLS);
+    saveButton.mouseReleased(onSave);
 }
 
 function updateCanvas() {
@@ -103,6 +109,7 @@ function updateCanvas() {
     console.log(`Window dimensions: ${windowWidth} x ${ch}`);
     resizeCanvas(windowWidth, ch);
     svgCanvas.setAttribute('viewBox', `0 0 ${windowWidth} ${ch}`)
+    clear();
 }
 
 function drawCenterSpot() {
@@ -249,6 +256,11 @@ function onColorChange() {
 
 function onUndo() {
     loadLastImageToCanvas();
+}
+
+function onSave() {
+    saveCanvas();
+    clear();
 }
 
 /**
